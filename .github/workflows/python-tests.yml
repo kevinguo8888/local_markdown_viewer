@@ -42,6 +42,18 @@ jobs:
         run: |
           python -c "import psutil; print('psutil version:', psutil.__version__)"
 
+      - name: Verify Flask version
+        shell: pwsh
+        run: |
+          python -c "import flask; print('flask version:', flask.__version__)"
+
+      - name: Verify PyQt/QtWebEngine environment
+        shell: pwsh
+        run: |
+          python -c "import os; print('LAD_TEST_MODE=', os.environ.get('LAD_TEST_MODE')); print('PYTEST_PROGRESS_LOG in env=', 'PYTEST_PROGRESS_LOG' in os.environ)"
+          python -c "import sys; print('python exe=', sys.executable)"
+          python -c "import importlib.util as u; print('QtWebEngine present=', u.find_spec('PyQt5.QtWebEngineWidgets') is not None)"
+
       - name: Collect tests only (debug)
         shell: pwsh
         continue-on-error: true

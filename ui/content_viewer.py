@@ -397,13 +397,31 @@ class ContentViewer(QWidget):
         settings = self.web_engine_view.settings()
         
         # 基本设置
-        settings.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, True)
-        settings.setAttribute(QWebEngineSettings.LocalStorageEnabled, True)
-        settings.setAttribute(QWebEngineSettings.JavascriptEnabled, True)
+        try:
+            qs = globals().get('QWebEngineSettings', None)
+            if qs is not None:
+                attr = getattr(qs, 'LocalContentCanAccessRemoteUrls', None)
+                if attr is not None:
+                    settings.setAttribute(attr, True)
+                attr = getattr(qs, 'LocalStorageEnabled', None)
+                if attr is not None:
+                    settings.setAttribute(attr, True)
+                attr = getattr(qs, 'JavascriptEnabled', None)
+                if attr is not None:
+                    settings.setAttribute(attr, True)
+        except Exception:
+            pass
         
         # 字体设置
-        default_font_size = self.config_manager.get_config("content_viewer.default_font_size", 14, "ui")
-        settings.setFontSize(QWebEngineSettings.DefaultFontSize, default_font_size)
+        try:
+            qs = globals().get('QWebEngineSettings', None)
+            if qs is not None:
+                default_font_size = self.config_manager.get_config("content_viewer.default_font_size", 14, "ui")
+                size_attr = getattr(qs, 'DefaultFontSize', None)
+                if size_attr is not None:
+                    settings.setFontSize(size_attr, default_font_size)
+        except Exception:
+            pass
         
         # 缩放设置
         default_zoom = self.config_manager.get_config("content_viewer.default_zoom", 1.0, "ui")
