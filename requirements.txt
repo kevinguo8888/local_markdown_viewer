@@ -9,5 +9,6 @@ PyQt5>=5.15.0
 mistune>=3.0.0
 
 # 其他工具包
+psutil>=5.9.8
 pathlib2>=2.3.0; python_version < "3.4"
-typing-extensions>=4.0.0; python_version < "3.8" 
+typing-extensions>=4.0.0; python_version < "3.8"
