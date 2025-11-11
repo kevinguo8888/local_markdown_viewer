@@ -7,6 +7,7 @@ PyQt5>=5.15.0
 
 # Markdown处理（复用现有的markdown_processor）
 mistune>=3.0.0
+markdown>=3.5.0
 
 # 其他工具包
 Flask>=2.3.0

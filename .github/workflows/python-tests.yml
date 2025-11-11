@@ -47,6 +47,11 @@ jobs:
         run: |
           python -c "import flask; print('flask version:', flask.__version__)"
 
+      - name: Verify Markdown version
+        shell: pwsh
+        run: |
+          python -c "import markdown; print('markdown version:', getattr(markdown, '__version__', 'unknown'))"
+
       - name: Verify PyQt/QtWebEngine environment
         shell: pwsh
         run: |
