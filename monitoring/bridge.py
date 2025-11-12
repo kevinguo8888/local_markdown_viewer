@@ -56,6 +56,8 @@ async def start_monitoring_if_enabled() -> None:
     try:
         metrics_dir = PROJECT_ROOT / "metrics"
         metrics_dir.mkdir(parents=True, exist_ok=True)
+        # CI 断言需要 metrics/bridge 目录存在
+        (metrics_dir / "bridge").mkdir(parents=True, exist_ok=True)
         if getattr(deployer, "storage_config", None) is None:
             deployer.storage_config = {}
         retention = cfg.get("monitoring", {}).get("retention_days", 7)

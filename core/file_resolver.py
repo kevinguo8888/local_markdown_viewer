@@ -17,6 +17,8 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Tuple, Union
 import json
 from collections import OrderedDict
+import ctypes
+from ctypes import wintypes
 
 try:
     import chardet
@@ -176,7 +178,7 @@ class FileResolver:
             # 构建成功结果
             result = {
                 'success': True,
-                'file_path': str(file_path),
+                'file_path': self._normalize_path(file_path),
                 'file_info': file_info,
                 'file_type': file_type,
                 'encoding': encoding_info or {},
@@ -204,6 +206,36 @@ class FileResolver:
         merged_options = self.DEFAULT_RESOLVE_OPTIONS.copy()
         merged_options.update(options)
         return merged_options
+    
+    def _normalize_path(self, file_path: Path) -> str:
+        try:
+            # Windows 返回长路径（避免 RUNNER~1），其他平台返回规范化字符串
+            if os.name == 'nt':
+                return self._normalize_path_windows(file_path)
+            return os.path.normpath(str(file_path))
+        except Exception:
+            return str(file_path)
+
+    def _normalize_path_windows(self, file_path: Path) -> str:
+        try:
+            p = str(file_path)
+            GetLongPathNameW = ctypes.windll.kernel32.GetLongPathNameW
+            GetLongPathNameW.argtypes = [wintypes.LPCWSTR, wintypes.LPWSTR, wintypes.DWORD]
+            GetLongPathNameW.restype = wintypes.DWORD
+            buf_len = 260
+            while True:
+                buf = ctypes.create_unicode_buffer(buf_len)
+                r = GetLongPathNameW(p, buf, buf_len)
+                if r == 0:
+                    break
+                if r > buf_len:
+                    buf_len = r
+                    continue
+                p = buf.value
+                break
+            return os.path.normpath(p)
+        except Exception:
+            return os.path.normpath(str(file_path))
     
     def _validate_path_with_options(self, file_path: Path, options: Dict[str, Any]) -> Dict[str, Any]:
         """使用选项验证文件路径"""

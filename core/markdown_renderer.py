@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, Union, Tuple, List
 from functools import lru_cache
 from datetime import datetime
+import builtins
 
 # 导入统一缓存管理器
 from .unified_cache_manager import UnifiedCacheManager, CacheStrategy
@@ -278,7 +279,7 @@ class HybridMarkdownRenderer:
                 debug_dir = Path(__file__).parent.parent / 'debug_render'
                 debug_dir.mkdir(parents=True, exist_ok=True)
                 debug_file = debug_dir / 'content_render.fail.json'
-                with open(debug_file, 'w', encoding='utf-8') as f:
+                with builtins.open(debug_file, 'w', encoding='utf-8') as f:
                     json.dump({
                         'stage': 'render(content)',
                         'error': error_result.get('error_info', {}),
@@ -366,7 +367,7 @@ class HybridMarkdownRenderer:
                 debug_dir.mkdir(parents=True, exist_ok=True)
                 name = Path(str(file_path)).name if file_path else 'unknown.md'
                 debug_file = debug_dir / f'{name}.fail.json'
-                with open(debug_file, 'w', encoding='utf-8') as f:
+                with builtins.open(debug_file, 'w', encoding='utf-8') as f:
                     json.dump({
                         'stage': 'render_file',
                         'file_path': str(file_path),
