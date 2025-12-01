@@ -28,8 +28,6 @@ backup_link_fixes/
 cache_optimization_test.log
 error_handling_test.log
 deep_analysis_results.txt
-integration_test_report.json
-validation_report.json
 *.log
 
 # --- 指标/监控/输出数据（如可再生成，可开启） ---
