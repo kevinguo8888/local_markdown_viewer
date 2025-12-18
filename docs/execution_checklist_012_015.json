@@ -115,7 +115,7 @@
       "expected_artifacts": [
         "docs/012-lpclick-integration-report.md"
       ],
-      "status": "pending"
+      "status": "completed"
     },
 
     {
@@ -184,12 +184,12 @@
         "tests/test_link_security_rules.py",
         "docs/013-安全规则说明.md"
       ],
-      "status": "pending"
+      "status": "completed"
     },
 
     {
       "step_id": "S07",
-      "title": "014: UX improvements (preview, indicators, error messages)",
+      "title": "014: UX improvements (preview, indicators, error messages, simplified A-scope for local_markdown_viewer_app)",
       "category": "impl",
       "depends_on": ["S06"],
       "ref_doc": "docs/LAD-IMPL-012到015-链接处理系列-任务提示词.md",
@@ -201,7 +201,7 @@
         "tests/test_link_preview_and_ux.py",
         "docs/014-体验优化说明.md"
       ],
-      "status": "pending"
+      "status": "completed"
     },
 
     {

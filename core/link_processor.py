@@ -113,7 +113,18 @@ class PathResolver:
         - 绝对路径直接标准化返回
         - 正确处理 ./ 和 ../ 相对路径语义
         - 修复：相对路径应基于当前文件所在目录，而非累积嵌套
+        - 额外修复：对不含协议的相对路径执行 URL 解码，以支持文件名中包含中文等被百分号编码的场景
         """
+        # 预处理：对不含协议的路径片段执行 URL 解码，修复 href 中包含 %E5%... 的本地文件名
+        raw = href or ""
+        try:
+            if "%" in raw and "://" not in raw:
+                href = unquote(raw)
+            else:
+                href = raw
+        except Exception:
+            href = raw
+
         # 绝对路径：直接标准化
         candidate = Path(href)
         if candidate.is_absolute():
@@ -329,6 +340,25 @@ class LinkProcessor:
                 base_file = ctx.current_file or (ctx.current_dir / "_base_.md" if ctx.current_dir else None)
                 resolved_path = self.path_resolver.resolve_relative(base_file, ctx.href)
                 vres = self.validator.validate(resolved_path, self.policy)
+
+                # 处理 '.md.md' 路径
+                if (not vres.ok) and vres.error_code == ErrorCode.NOT_FOUND:
+                    try:
+                        name = resolved_path.name if isinstance(resolved_path, Path) else ""
+                    except Exception:
+                        name = ""
+                    if name and name.lower().endswith(".md.md"):
+                        try:
+                            fixed_name = name[:-3]  # '.md'
+                            candidate = resolved_path.with_name(fixed_name)
+                        except Exception:
+                            candidate = None
+                        if candidate is not None and candidate.exists():
+                            vres2 = self.validator.validate(candidate, self.policy)
+                            if vres2.ok:
+                                resolved_path = candidate
+                                vres = vres2
+
                 if not vres.ok:
                     result = LinkResult(success=False, action="show_error", payload={"path": str(resolved_path)}, message=vres.message, error_code=vres.error_code)
                 else:
@@ -383,13 +413,123 @@ class LinkProcessor:
                     result = handler.handle(ctx, ctx.href)
                     
             elif link_type == LinkType.TOC:
-                # TOC目录项处理
+                # TOC目录项处理：
+                # - 形如 "other.md#anchor" 的跨文档锚点：解析出目标 markdown 文件路径和片段
+                # - 其他无法安全识别为跨文档的场景：保持向后兼容，仅将原始 href 交给处理器
                 handler = self._handlers.get(link_type)
                 if handler is None:
                     result = LinkResult(success=False, action="", payload={}, message="Handler not implemented", error_code=ErrorCode.UNSUPPORTED)
                 else:
-                    result = handler.handle(ctx, ctx.href)
-                    
+                    raw = ctx.href or ""
+                    # 不含 #：退化为旧行为
+                    if "#" not in raw:
+                        result = handler.handle(ctx, raw)
+                    else:
+                        path_part, fragment = raw.split("#", 1)
+                        # 仅在当前有明确的当前文件、且 path_part 看起来是 markdown 文件时，才按“跨文档”处理
+                        if not (ctx.current_file and path_part.strip().lower().endswith(".md")):
+                            # 向后兼容：仍交由处理器按原始 href 解释
+                            result = handler.handle(ctx, raw)
+                        else:
+                            base_file = ctx.current_file or (ctx.current_dir / "_base_.md" if ctx.current_dir else None)
+                            resolved_path = self.path_resolver.resolve_relative(base_file, path_part)
+                            vres = self.validator.validate(resolved_path, self.policy)
+
+                            # 处理 '.md.md' 路径
+                            if (not vres.ok) and vres.error_code == ErrorCode.NOT_FOUND:
+                                try:
+                                    name = resolved_path.name if isinstance(resolved_path, Path) else ""
+                                except Exception:
+                                    name = ""
+                                if name and name.lower().endswith(".md.md"):
+                                    try:
+                                        fixed_name = name[:-3]
+                                        candidate = resolved_path.with_name(fixed_name)
+                                    except Exception:
+                                        candidate = None
+                                    if candidate is not None and candidate.exists():
+                                        vres2 = self.validator.validate(candidate, self.policy)
+                                        if vres2.ok:
+                                            resolved_path = candidate
+                                            vres = vres2
+
+                            if not vres.ok:
+                                result = LinkResult(
+                                    success=False,
+                                    action="show_error",
+                                    payload={"path": str(resolved_path)},
+                                    message=vres.message,
+                                    error_code=vres.error_code,
+                                )
+                            else:
+                                # 将解析后的目标文件路径与片段一起交给处理器，由其决定具体动作
+                                resolved_info = {"path": resolved_path, "fragment": fragment}
+                                result = handler.handle(ctx, resolved_info)
+
+            elif link_type == LinkType.UNKNOWN and ctx.href and (ctx.current_file or ctx.current_dir):
+                # 兜底：优先尝试将 UNKNOWN 识别为本地目录或文件，例如 "./10_AI_tools"、"universal-session-timestamp.js" 等
+                try:
+                    base_file = ctx.current_file or (ctx.current_dir / "_base_.md" if ctx.current_dir else None)
+                    resolved_path = self.path_resolver.resolve_relative(base_file, ctx.href)
+                except Exception as ex:
+                    result = LinkResult(success=False, action="", payload={}, message=str(ex), error_code=ErrorCode.INTERNAL_ERROR)
+                else:
+                    is_dir = False
+                    is_file = False
+                    try:
+                        if resolved_path.exists():
+                            is_dir = resolved_path.is_dir()
+                            is_file = resolved_path.is_file()
+                    except Exception:
+                        is_dir = False
+                        is_file = False
+
+                    if is_dir:
+                        # 作为目录处理（用于 ./10_AI_tools 这类链接）
+                        vres = self.validator.validate(resolved_path, self.policy)
+                        if not vres.ok:
+                            result = LinkResult(
+                                success=False,
+                                action="show_error",
+                                payload={"path": str(resolved_path)},
+                                message=vres.message,
+                                error_code=vres.error_code,
+                            )
+                        else:
+                            handler = self._handlers.get(LinkType.DIRECTORY)
+                            if handler is None:
+                                result = LinkResult(success=False, action="", payload={}, message="Handler not implemented", error_code=ErrorCode.UNSUPPORTED)
+                            else:
+                                # 记录为 DIRECTORY 类型，便于日志与后续分析
+                                link_type = LinkType.DIRECTORY
+                                result = handler.handle(ctx, resolved_path)
+                    elif is_file:
+                        # 作为普通文件处理：交由上层根据扩展名决定如何展示（例如 .js/.txt）
+                        vres = self.validator.validate(resolved_path, self.policy)
+                        if not vres.ok:
+                            result = LinkResult(
+                                success=False,
+                                action="show_error",
+                                payload={"path": str(resolved_path)},
+                                message=vres.message,
+                                error_code=vres.error_code,
+                            )
+                        else:
+                            result = LinkResult(
+                                success=True,
+                                action="open_file",
+                                payload={"path": str(resolved_path)},
+                                message="",
+                                error_code=None,
+                            )
+                    else:
+                        # 仍视为 UNKNOWN，回退到默认处理逻辑
+                        handler = self._handlers.get(link_type)
+                        if handler is None:
+                            result = LinkResult(success=False, action="", payload={}, message="Handler not implemented", error_code=ErrorCode.UNSUPPORTED)
+                        else:
+                            result = handler.handle(ctx, ctx.href)
+
             else:
                 # 其他类型维持原有简单路由（例如 ANCHOR）
                 handler = self._handlers.get(link_type)
@@ -563,8 +703,9 @@ class DirectoryHandler:
 
 class AnchorHandler:
     def handle(self, ctx: LinkContext, resolved: Any) -> LinkResult:
-        # 提取锚点ID（去掉#号）
-        anchor_id = ctx.href.lstrip('#')
+        # 提取锚点ID（去掉#号），并对 href 中可能存在的URL编码进行解码，
+        # 以匹配 markdown_utils.slugify 生成的实际 DOM id（中文等保持原文）。
+        anchor_id = unquote(ctx.href.lstrip('#'))
         return LinkResult(success=True, action="scroll_to_anchor", payload={"id": anchor_id}, message="", error_code=None)
 
 
@@ -580,9 +721,54 @@ class MermaidHandler:
 
 class TocHandler:
     def handle(self, ctx: LinkContext, resolved: Any) -> LinkResult:
-        # TOC项统一路由到锚点处理
-        anchor_id = ctx.href.lstrip('#')
-        return LinkResult(success=True, action="scroll_to_anchor", payload={"id": anchor_id}, message="", error_code=None)
+        """TOC 目录项处理。
+
+        - 跨文档场景（推荐）：
+          resolved 为 {"path": Path, "fragment": str}
+          → 返回 action="open_markdown_in_tree"，payload 同时包含目标文件路径与解码后的锚点 ID
+
+        - 回退场景（向后兼容）：
+          resolved 为原始 href 字符串或其他简单形式
+          → 退化为当前文档内的 scroll_to_anchor 行为
+        """
+
+        # 新语义：当 resolved 为 dict 且包含 path/fragment 时，视为“跨文档 TOC 链接”
+        if isinstance(resolved, dict) and ("path" in resolved or "fragment" in resolved):
+            target_path = resolved.get("path")
+            fragment = resolved.get("fragment") or ""
+            # 允许 fragment 中再次包含 #，仅取 # 之后的部分
+            if "#" in fragment:
+                fragment = fragment.split("#", 1)[1]
+            anchor_id = unquote(fragment.lstrip("#"))
+
+            payload: Dict[str, Any] = {}
+            if target_path is not None:
+                payload["path"] = str(target_path)
+            if anchor_id:
+                payload["anchor"] = anchor_id
+
+            return LinkResult(
+                success=True,
+                action="open_markdown_in_tree",
+                payload=payload,
+                message="",
+                error_code=None,
+            )
+
+        # 向后兼容：当无法识别为跨文档链接时，退化为“当前文档内锚点滚动”
+        raw = ctx.href or ""
+        if '#' in raw:
+            fragment = raw.split('#', 1)[1]
+        else:
+            fragment = raw.lstrip('#')
+        anchor_id = unquote(fragment)
+        return LinkResult(
+            success=True,
+            action="scroll_to_anchor",
+            payload={"id": anchor_id},
+            message="",
+            error_code=None,
+        )
 
 
 class FileProtocolHandler:

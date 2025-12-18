@@ -1,5 +1,7 @@
 param(
     [string]$Message = "Update local_markdown_viewer_app",
+    # 可选：用于 git commit body 的多行文本；为空时只使用 Message 作为提交说明
+    [string]$Body = "",
     [string]$Branch = "main"
 )
 
@@ -23,7 +25,12 @@ Write-Host "Staging changes..." -ForegroundColor Cyan
  git add .
 
 Write-Host "Creating commit..." -ForegroundColor Cyan
- git commit -m $Message
+if ([string]::IsNullOrWhiteSpace($Body)) {
+    git commit -m $Message
+}
+else {
+    git commit -m $Message -m $Body
+}
 
 Write-Host "Pushing to origin/$Branch ..." -ForegroundColor Cyan
  git push origin $Branch

@@ -56,6 +56,9 @@ logs/*
 *.temp.md
 *.temp.py
 
+# 本地代码备份文件
+*.__lad_bak*
+
 # SQLite 临时文件
 *.db-shm
 *.db-wal

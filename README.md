@@ -1,6 +1,7 @@
 # 本地Markdown文件渲染器
  
 [![Python Tests](https://github.com/kevinguo8888/local_markdown_viewer/actions/workflows/python-tests.yml/badge.svg)](https://github.com/kevinguo8888/local_markdown_viewer/actions/workflows/python-tests.yml)
+[![Integration QA](https://github.com/kevinguo8888/local_markdown_viewer/actions/workflows/integration-qa.yml/badge.svg)](https://github.com/kevinguo8888/local_markdown_viewer/actions/workflows/integration-qa.yml)
 
 ## 项目简介
 
@@ -9,6 +10,15 @@
 ## 快速链接
 
 - [013 测试门控与运行指南](docs/013-测试门控与运行指南.md)
+- [质量保证 / QA 总览](docs/QA.md)
+- [LAD-IMPL-014/015 与 integration.qa 对齐说明](docs/LAD-IMPL-014/015 与 integration.qa 对齐说明.md)
+
+## 质量保证 / QA
+
+- 完整 QA 分层与流程说明见：[`docs/QA.md`](docs/QA.md)
+- 关键 CI 工作流：
+  - [Python Tests](.github/workflows/python-tests.yml)
+  - [Integration QA](.github/workflows/integration-qa.yml)
 
 ## 功能特性
 
@@ -238,6 +248,8 @@ AI 生成代码时应将该注释视作"范式提示"，优先遵循当前模块
 - `cache/delete_pattern_utils.py` - 缓存通配删除工具
 
 ## 项目进展
+
+当前状态概览：012–014 已按本仓库约定范围完成并阶段封盘；015、016 处于“规划与清单已落盘、实现待后续推进”的阶段。
 
 ### 最新更新 (2025-09-01)
 - **核心功能优化**: 完成LAD-IMPL-004/005/006任务，优化DynamicModuleImporter和HybridMarkdownRenderer

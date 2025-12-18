@@ -43,7 +43,7 @@ import tempfile
 import os
 from pathlib import Path
 from typing import Optional, Dict, Any, Union
-from urllib.parse import urljoin
+from urllib.parse import urljoin, quote
 from urllib.request import pathname2url
 
 from PyQt5.QtWidgets import (
@@ -120,6 +120,7 @@ if _WEBENGINE_AVAILABLE:
             self._owner = owner
         
         def javaScriptConsoleMessage(self, level, message, lineNumber, sourceID):
+            """转发 JS 控制台消息，并通过 LPCLICK 桥接到 ContentViewer._handle_lpclick。"""
             # Forward to owner's handler for optional logging
             try:
                 self._owner._on_js_console_message(level, message, lineNumber, sourceID)
@@ -133,6 +134,34 @@ if _WEBENGINE_AVAILABLE:
                         self._owner._handle_lpclick(href)
             except Exception:
                 pass
+
+        def acceptNavigationRequest(self, url, nav_type, isMainFrame):
+            """拦截链接点击，转交给 owner._handle_lpclick，再阻止默认导航。"""
+            try:
+                nav_name = ""
+                try:
+                    if hasattr(QWebEnginePage, "NavigationTypeLinkClicked") \
+                            and nav_type == QWebEnginePage.NavigationTypeLinkClicked:
+                        nav_name = "NavigationTypeLinkClicked"
+                    else:
+                        nav_name = str(nav_type)
+                except Exception:
+                    nav_name = str(nav_type)
+
+                if str(nav_name) == "NavigationTypeLinkClicked":
+                    try:
+                        href = url.toString() if hasattr(url, "toString") else str(url)
+                    except Exception:
+                        href = str(url)
+                    if href:
+                        try:
+                            self._owner._handle_lpclick(href)
+                        except Exception:
+                            pass
+                    return False
+            except Exception:
+                pass
+            return super().acceptNavigationRequest(url, nav_type, isMainFrame)
 else:
     class _CVPage(object):
         """Custom page to surface JS console messages and synthetic link clicks."""
@@ -150,6 +179,23 @@ else:
                         self._owner._handle_lpclick(href)
             except Exception:
                 pass
+
+        def acceptNavigationRequest(self, url, nav_type, isMainFrame):
+            """测试环境下模拟真实的链接点击拦截行为。"""
+            try:
+                nav_name = str(nav_type)
+                if nav_name == "NavigationTypeLinkClicked":
+                    href = str(url)
+                    if hasattr(self._owner, "_handle_lpclick"):
+                        try:
+                            self._owner._handle_lpclick(href)
+                        except Exception:
+                            pass
+                    return False
+            except Exception:
+                pass
+            return True
+
 
 class _TestPageStub:
     def runJavaScript(self, js):
@@ -252,6 +298,8 @@ class ContentViewer(QWidget):
         # 导航与历史栈保护
         self._nav_in_progress = False
         self._zoom_factor_last = None
+        # 待跳转锚点（用于跨文档 TOC 链接在文件加载完成后滚动到目标位置）
+        self._pending_anchor = None
         self._is_test_mode = False
         try:
             self._history_max = int(self.config_manager.get_config("content_viewer.history_max", 200, "ui"))
@@ -650,13 +698,13 @@ class ContentViewer(QWidget):
     def display_file(self, file_path: str, force_reload: bool = False):
         """显示文件内容"""
         self.logger.info(f"NAV|current={file_path}")
-        
+
         # 清理旧的WebEngine Page对象，防止进程泄漏
         self._cleanup_old_page()
-        
+
         # 更新当前文件路径
         self.current_file_path = file_path
-        
+
         # 断开旧的信号连接，防止重复处理
         try:
             if self.web_engine_view:
@@ -676,34 +724,71 @@ class ContentViewer(QWidget):
                 self.web_engine_view.loadFinished.connect(self._on_load_finished)
         except Exception:
             pass
-        
+
         # 检查缓存
         if not force_reload and file_path in self.content_cache:
             self._display_cached_content(file_path)
             self.content_loaded.emit(file_path, True)
             return
-        
+
         # 更新状态
         self._set_status(f"正在加载: {Path(file_path).name}")
         self._show_progress(True)
-        
+
         try:
+            # 特殊处理：目录索引虚拟文件 _index_.dir.md，避免走文件解析导致“文件解析失败”
+            try:
+                p = Path(file_path)
+            except Exception:
+                p = None
+            if p is not None and p.name == "_index_.dir.md" and not p.exists() and self.web_engine_view:
+                dir_path = p.parent
+                if dir_path and dir_path.exists() and dir_path.is_dir():
+                    items = []
+                    try:
+                        for q in sorted(dir_path.iterdir()):
+                            name = q.name
+                            try:
+                                href_name = quote(name)
+                            except Exception:
+                                href_name = name
+                            href = href_name + ('/' if q.is_dir() else '')
+                            items.append(f"<li><a href='{href}'>{name}</a></li>")
+                    except Exception:
+                        pass
+                    html = (
+                        "<!DOCTYPE html><html><head><meta charset='utf-8'><title>目录索引</title></head><body>"
+                        f"<h3>目录：{dir_path.as_posix()}</h3>"
+                        "<p>未找到 README.md，已显示目录列表。</p>"
+                        f"<ul>{''.join(items)}</ul>"
+                        "</body></html>"
+                    )
+                    try:
+                        self.web_engine_view.setHtml(html, QUrl.fromLocalFile(str(dir_path)))
+                    except Exception:
+                        self.web_engine_view.setHtml(html)
+                    try:
+                        self._set_status("目录链接（展示目录索引）")
+                    except Exception:
+                        pass
+                    return
+
             # 解析文件
             file_info = self.file_resolver.resolve_file_path(file_path)
             if not file_info['success']:
                 self._display_error("文件解析失败", file_info.get('error', '未知错误'))
                 return
-            
+
             # 根据文件类型选择显示方式
             renderer_type = file_info['file_type']['extension_type']['renderer']
             self._display_content_by_type(file_path, file_info, renderer_type)
-            
+
         except Exception as e:
             self.logger.error(f"文件显示失败: {e}")
             self._display_error("显示失败", str(e))
         finally:
             self._show_progress(False)
-    
+
     def _display_content_by_type(self, file_path: str, file_info: Dict[str, Any], renderer_type: str):
         """根据文件类型显示内容"""
         try:
@@ -983,43 +1068,68 @@ class ContentViewer(QWidget):
     
     def _on_page_load_finished(self, success: bool):
         """页面加载完成后的处理"""
-        if success:
-            # 页面加载成功后设置链接处理（一次性注入拦截脚本）
+        try:
+            if success:
+                # 页面加载成功后设置链接处理（一次性注入拦截脚本）
+                try:
+                    js = r"""
+                        (function() {
+                            try {
+                                // 清理旧监听
+                                if (window.linkClickHandler) {
+                                    document.removeEventListener('click', window.linkClickHandler, true);
+                                }
+                                window.linkClickHandler = function(ev){
+                                    try{
+                                        var a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
+                                        if (!a || !a.getAttribute) { return; }
+                                        var href = a.getAttribute('href') || '';
+                                        if (!href) { return; }
+                                        ev.preventDefault();
+                                        console.log('LPCLICK:' + href);
+                                        return false;
+                                    }catch(e){ console.log('link-handler-error:' + e); }
+                                };
+                                document.addEventListener('click', window.linkClickHandler, true);
+                                console.log('link-handlers-attached');
+                            } catch (e) { console.log('link-handler-init-error:' + e); }
+                        })();
+                    """
+                    self.web_engine_view.page().runJavaScript(js)
+                except Exception as e:
+                    self.logger.warning(f"注入链接处理脚本失败: {e}")
+                # 断开连接，避免重复调用
+                try:
+                    self.web_engine_view.loadFinished.disconnect(self._on_page_load_finished)
+                except Exception:
+                    pass
+                self.logger.info("页面加载完成，链接处理已设置")
+                try:
+                    anchor = getattr(self, "_pending_anchor", None)
+                except Exception:
+                    anchor = None
+                if anchor and self.web_engine_view:
+                    try:
+                        safe_anchor = str(anchor).replace("\\", "\\\\").replace("'", "\\'")
+                        js_anchor = (
+                            "(function(a){var el=document.getElementById(a)||"
+                            "document.querySelector('[name=\\\"'+a+'\\\"]');"
+                            "if(el){el.scrollIntoView({behavior:'smooth'});}})('" + safe_anchor + "');"
+                        )
+                        self.web_engine_view.page().runJavaScript(js_anchor)
+                        self._set_status(f"已跳转到锚点: {anchor}")
+                    except Exception as e:
+                        try:
+                            self.logger.warning(f"锚点跳转执行失败: {e}")
+                        except Exception:
+                            pass
+            else:
+                self.logger.warning("页面加载失败")
+        finally:
             try:
-                js = r"""
-                    (function() {
-                        try {
-                            // 清理旧监听
-                            if (window.linkClickHandler) {
-                                document.removeEventListener('click', window.linkClickHandler, true);
-                            }
-                            window.linkClickHandler = function(ev){
-                                try{
-                                    var a = ev.target && ev.target.closest ? ev.target.closest('a') : null;
-                                    if (!a || !a.getAttribute) { return; }
-                                    var href = a.getAttribute('href') || '';
-                                    if (!href) { return; }
-                                    ev.preventDefault();
-                                    console.log('LPCLICK:' + href);
-                                    return false;
-                                }catch(e){ console.log('link-handler-error:' + e); }
-                            };
-                            document.addEventListener('click', window.linkClickHandler, true);
-                            console.log('link-handlers-attached');
-                        } catch (e) { console.log('link-handler-init-error:' + e); }
-                    })();
-                """
-                self.web_engine_view.page().runJavaScript(js)
-            except Exception as e:
-                self.logger.warning(f"注入链接处理脚本失败: {e}")
-            # 断开连接，避免重复调用
-            try:
-                self.web_engine_view.loadFinished.disconnect(self._on_page_load_finished)
+                self._pending_anchor = None
             except Exception:
                 pass
-            self.logger.info("页面加载完成，链接处理已设置")
-        else:
-            self.logger.warning("页面加载失败")
     
     def _setup_simple_link_handling(self):
         """设置简单的链接处理（使用更直接的方法）"""
@@ -1105,9 +1215,12 @@ class ContentViewer(QWidget):
                 self._set_status("已打开外部链接")
             elif link_type in {"anchor", "internal_anchor"}:
                 if self.web_engine_view:
+                    anchor_id = href.lstrip('#')
+                    safe_anchor = str(anchor_id).replace("\\", "\\\\").replace("'", "\\'")
                     js = (
-                        "(function(a){var el=document.getElementById(a)||document.querySelector('[name=""+a+""]');"
-                        "if(el){el.scrollIntoView({behavior:'smooth'});}})('" + href.lstrip('#').replace("'","\\'") + "');"
+                        "(function(a){var el=document.getElementById(a)||"
+                        "document.querySelector('[name=\\\"'+a+'\\\"]');"
+                        "if(el){el.scrollIntoView({behavior:'smooth'});}})('" + safe_anchor + "');"
                     )
                     self.web_engine_view.page().runJavaScript(js)
                 self._set_status(f"已跳转到锚点: {href}")
@@ -1209,7 +1322,29 @@ class ContentViewer(QWidget):
             # 动作分发（兼容旧/新命名）
             if action in ('open_markdown_in_tree', 'open_file'):
                 target = payload.get('path') or payload.get('target')
+                anchor = None
+                if isinstance(payload, dict):
+                    anchor = payload.get('anchor') or payload.get('fragment') or payload.get('id')
+                # 仅在 '#' 出现在文件名中且非首字符时，才将其视为“路径#锚点”分隔符，
+                # 避免误伤以 '#' 开头的真实文件名（例如 "# 开头的文件.txt"）。
+                if isinstance(target, str):
+                    try:
+                        base_name = Path(target).name
+                    except Exception:
+                        base_name = target
+                    hash_pos = base_name.find('#')
+                    if hash_pos > 0:
+                        base, frag = target.split('#', 1)
+                        target = base
+                        if not anchor and frag:
+                            anchor = frag
+
                 if target:
+                    if anchor:
+                        try:
+                            self._pending_anchor = str(anchor)
+                        except Exception:
+                            self._pending_anchor = anchor
                     try:
                         self.logger.info(f"NAV|open_file|from={self.current_file_path}|to={target}")
                     except Exception:
@@ -1237,9 +1372,11 @@ class ContentViewer(QWidget):
             elif action in ('scroll_to_anchor',):
                 anchor = payload.get('id') or payload.get('anchor') or payload.get('target')
                 if anchor and self.web_engine_view:
+                    safe_anchor = str(anchor).replace("\\", "\\\\").replace("'", "\\'")
                     js = (
-                        "(function(a){var el=document.getElementById(a)||document.querySelector('[name=""+a+""]');"
-                        "if(el){el.scrollIntoView({behavior:'smooth'});}})('" + str(anchor).replace("'","\\'") + "');"
+                        "(function(a){var el=document.getElementById(a)||"
+                        "document.querySelector('[name=\\\"'+a+'\\\"]');"
+                        "if(el){el.scrollIntoView({behavior:'smooth'});}})('" + safe_anchor + "');"
                     )
                     self.web_engine_view.page().runJavaScript(js)
                     self._set_status(f"已跳转到锚点: {anchor}")
@@ -1251,9 +1388,9 @@ class ContentViewer(QWidget):
                     from pathlib import Path as _P
                     dir_path = _P(payload.get('path') or '')
                     if dir_path and dir_path.exists() and dir_path.is_dir():
+                        _push_history()
                         candidate = dir_path / 'README.md'
                         if candidate.exists():
-                            _push_history()
                             self.display_file(str(candidate), force_reload=True)
                             try:
                                 self._set_status(f"已打开目录 README: {candidate.name}")
@@ -1261,14 +1398,29 @@ class ContentViewer(QWidget):
                                 pass
                         else:
                             # 构造简易目录索引 HTML 并直接显示
+                            # 在目录索引模式下，将 current_file_path 视为目录下的虚拟文件，保证后续相对链接解析基于该目录
+                            try:
+                                self.current_file_path = str(dir_path / "_index_.dir.md")
+                            except Exception:
+                                try:
+                                    self.current_file_path = str(dir_path)
+                                except Exception:
+                                    pass
+
                             items = []
                             try:
                                 for p in sorted(dir_path.iterdir()):
                                     name = p.name
-                                    href = name + ('/' if p.is_dir() else '')
+                                    try:
+                                        # 对文件名进行 URL 编码，避免以 '#' 开头的名称被误判为锚点
+                                        href_name = quote(name)
+                                    except Exception:
+                                        href_name = name
+                                    href = href_name + ('/' if p.is_dir() else '')
                                     items.append(f"<li><a href='{href}'>{name}</a></li>")
                             except Exception:
                                 pass
+
                             html = (
                                 "<!DOCTYPE html><html><head><meta charset='utf-8'><title>目录索引</title></head><body>"
                                 f"<h3>目录：{dir_path.as_posix()}</h3>"
@@ -1573,6 +1725,13 @@ class ContentViewer(QWidget):
             self._set_status("加载完成" if ok else "加载失败")
         except Exception:
             pass
+        try:
+            self._on_page_load_finished(ok)
+        except Exception as e:
+            try:
+                self.logger.warning(f"_on_load_finished 处理失败: {e}")
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":

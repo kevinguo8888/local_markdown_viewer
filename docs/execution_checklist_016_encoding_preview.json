@@ -1,0 +1,110 @@
+{
+  "task_set_id": "LAD-IMPL-016-ENCODING-PREVIEW-V1.0",
+  "version": "1.0",
+  "notes": "Machine-readable checklist for the 016 encoding & preview fix专题. Decoupled from 012-015 link processing tasks; initial state is planning-only with no code changes applied.",
+  "tasks": [
+    {
+      "step_id": "E16-00",
+      "title": "Create 016 scope and planning doc",
+      "category": "doc",
+      "ref_doc": "docs/016-编码与预览修复.md",
+      "ref_section": "## 1. 问题描述与重现",
+      "target_files": [
+        "docs/016-编码与预览修复.md"
+      ],
+      "ai_guardrails": [
+        "Doc-only step: do not modify core/content_preview or ui/content_viewer logic.",
+        "Clearly state that 016 is independent from 012-015 link-processing tasks."
+      ],
+      "expected_artifacts": [
+        "docs/016-编码与预览修复.md"
+      ],
+      "status": "completed"
+    },
+
+    {
+      "step_id": "E16-01",
+      "title": "Baseline current encoding behavior and logs",
+      "category": "preflight",
+      "depends_on": ["E16-00"],
+      "ref_doc": "docs/016-编码与预览修复.md",
+      "ref_section": "## 3. 根因猜测与待确认点",
+      "target_files": [
+        "core/content_preview.py",
+        "ui/content_viewer.py",
+        "logs/"
+      ],
+      "preconditions": [
+        "App can open JS/JSON/PY files that currently exhibit garbled characters.",
+        "Logging for ContentPreview and ContentViewer is enabled."
+      ],
+      "ai_guardrails": [
+        "Focus on observation and logging; avoid changing behavior in this step.",
+        "Do not add heavy dependencies just for logging or inspection."
+      ],
+      "expected_artifacts": [
+        "docs/016-encoding-current-behavior-report.md"
+      ],
+      "status": "pending"
+    },
+
+    {
+      "step_id": "E16-02",
+      "title": "Design and implement encoding strategy for code/config files",
+      "category": "impl",
+      "depends_on": ["E16-01"],
+      "ref_doc": "docs/016-编码与预览修复.md",
+      "ref_section": "## 4. 修复策略草案",
+      "target_files": [
+        "core/content_preview.py",
+        "ui/content_viewer.py"
+      ],
+      "ai_guardrails": [
+        "Do not change Markdown rendering or link-processing behavior.",
+        "Prefer UTF-8 for JS/JSON/PY and similar text files unless explicit encoding is declared.",
+        "Avoid introducing heavy encoding-detection dependencies unless clearly marked as optional.",
+        "Keep implementation small and testable; log any fallback or auto-detection decisions."
+      ],
+      "expected_artifacts": [
+        "docs/016-encoding-strategy.md"
+      ],
+      "status": "pending"
+    },
+
+    {
+      "step_id": "E16-03",
+      "title": "Add tests for encoding and preview behavior",
+      "category": "test",
+      "depends_on": ["E16-02"],
+      "ref_doc": "docs/016-编码与预览修复.md",
+      "ref_section": "## 5. 测试与验证规划",
+      "target_files": [
+        "tests/"
+      ],
+      "preconditions": [
+        "Encoding strategy changes for ContentPreview/ContentViewer have been implemented.",
+        "Sample JS/JSON/PY files with UTF-8 Chinese content are available under test_data/ or similar."
+      ],
+      "expected_artifacts": [
+        "pytest_report_016_encoding.txt"
+      ],
+      "status": "pending"
+    },
+
+    {
+      "step_id": "E16-04",
+      "title": "Manual and UX verification for encoding fixes",
+      "category": "acceptance",
+      "depends_on": ["E16-03"],
+      "ref_doc": "docs/016-编码与预览修复.md",
+      "ref_section": "## 5. 测试与验证规划",
+      "target_files": [
+        "docs/016-编码与预览修复.md"
+      ],
+      "expected_artifacts": [
+        "docs/016-encoding-ux-report.md"
+      ],
+      "status": "pending"
+    }
+  ]
+}

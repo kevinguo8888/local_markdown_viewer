@@ -5,75 +5,75 @@
     "failed_tests": 0,
     "skipped_tests": 0,
     "success_rate": 100.0,
-    "total_execution_time": 0.36154699325561523
+    "total_execution_time": 0.35086774826049805
   },
   "test_results": [
     {
       "test_name": "\u6a21\u5757\u96c6\u6210\u534f\u8c03\u6d4b\u8bd5",
       "test_type": "integration",
       "status": "passed",
-      "execution_time": 0.0001926422119140625,
+      "execution_time": 0.0003447532653808594,
       "error_message": null,
       "details": {
         "status": "completed",
         "total_modules": 11,
         "successful_modules": 11,
         "failed_modules": 0,
-        "integration_time": 0.00027942657470703125,
+        "integration_time": 0.0004940032958984375,
         "module_details": {
           "LightweightPerformanceTest": {
             "status": "completed",
-            "integration_time": 2.6226043701171875e-06,
+            "integration_time": 7.3909759521484375e-06,
             "error_message": null
           },
           "ConfigMigrationManager": {
             "status": "completed",
-            "integration_time": 3.337860107421875e-06,
+            "integration_time": 5.0067901611328125e-06,
             "error_message": null
           },
           "EnhancedLogger": {
             "status": "completed",
-            "integration_time": 1.430511474609375e-06,
+            "integration_time": 1.9073486328125e-06,
             "error_message": null
           },
           "ResourceManager": {
             "status": "completed",
-            "integration_time": 1.1920928955078125e-06,
+            "integration_time": 1.6689300537109375e-06,
             "error_message": null
           },
           "ArchitectureAdapter": {
             "status": "completed",
-            "integration_time": 1.1920928955078125e-06,
+            "integration_time": 4.5299530029296875e-06,
             "error_message": null
           },
           "InterfaceCompatibilityManager": {
             "status": "completed",
-            "integration_time": 9.5367431640625e-07,
+            "integration_time": 1.9073486328125e-06,
             "error_message": null
           },
           "UnifiedCacheManager": {
             "status": "completed",
-            "integration_time": 1.430511474609375e-06,
+            "integration_time": 2.384185791015625e-06,
             "error_message": null
           },
           "UnifiedErrorHandler": {
             "status": "completed",
-            "integration_time": 1.1920928955078125e-06,
+            "integration_time": 4.5299530029296875e-06,
             "error_message": null
           },
           "PerformanceOptimizationStrategy": {
             "status": "completed",
-            "integration_time": 9.5367431640625e-07,
+            "integration_time": 1.1920928955078125e-06,
             "error_message": null
           },
           "BoundaryConditionHandler": {
             "status": "completed",
-            "integration_time": 7.152557373046875e-07,
+            "integration_time": 1.1920928955078125e-06,
             "error_message": null
           },
           "SystemResourceBoundaryChecker": {
             "status": "completed",
-            "integration_time": 9.5367431640625e-07,
+            "integration_time": 2.1457672119140625e-06,
             "error_message": null
           }
         },
@@ -84,11 +84,11 @@
       "test_name": "\u76d1\u63a7\u7cfb\u7edf\u90e8\u7f72\u6d4b\u8bd5",
       "test_type": "deployment",
       "status": "passed",
-      "execution_time": 1.4066696166992188e-05,
+      "execution_time": 2.47955322265625e-05,
       "error_message": null,
       "details": {
         "status": "success",
-        "deployment_time": 1764643134.671829,
+        "deployment_time": 1765864988.0831792,
         "monitoring_types": [
           "performance",
           "error",
@@ -106,38 +106,38 @@
       "test_name": "\u6027\u80fd\u57fa\u51c6\u6d4b\u8bd5",
       "test_type": "benchmark",
       "status": "passed",
-      "execution_time": 0.3604600429534912,
+      "execution_time": 0.3491511344909668,
       "error_message": null,
       "details": {
         "status": "completed",
         "baseline": {
           "baseline_name": "\u65b9\u68484.3.3\u57fa\u51c6",
           "baseline_version": "v1.0.0",
-          "created_at": "2025-12-02 10:38:54.671855",
+          "created_at": "2025-12-16 14:03:08.083232",
           "metrics": {
-            "file_loading_performance_execution_time": 19.625365734100342,
-            "file_loading_performance_memory_usage": 0.009765625,
-            "file_loading_performance_cpu_usage": 5.7625,
+            "file_loading_performance_execution_time": 17.21477508544922,
+            "file_loading_performance_memory_usage": 0.0107421875,
+            "file_loading_performance_cpu_usage": 9.9,
             "file_loading_performance_success_rate": 100.0,
-            "markdown_rendering_performance_execution_time": 15.042622884114584,
+            "markdown_rendering_performance_execution_time": 11.98879877726237,
             "markdown_rendering_performance_memory_usage": 0.0,
-            "markdown_rendering_performance_cpu_usage": 0.0,
+            "markdown_rendering_performance_cpu_usage": 1.3833333333333335,
             "markdown_rendering_performance_success_rate": 100.0,
-            "cache_performance_execution_time": 12.14444637298584,
-            "cache_performance_memory_usage": 0.0,
-            "cache_performance_cpu_usage": 4.8,
+            "cache_performance_execution_time": 11.89124584197998,
+            "cache_performance_memory_usage": 0.0009765625,
+            "cache_performance_cpu_usage": 5.2125,
             "cache_performance_success_rate": 100.0,
-            "error_handling_performance_execution_time": 12.135148048400879,
+            "error_handling_performance_execution_time": 14.704704284667969,
             "error_handling_performance_memory_usage": 0.0009765625,
-            "error_handling_performance_cpu_usage": 5.9875,
+            "error_handling_performance_cpu_usage": 29.65,
             "error_handling_performance_success_rate": 100.0,
-            "memory_usage_execution_time": 16.173124313354492,
+            "memory_usage_execution_time": 14.904340108235678,
             "memory_usage_memory_usage": 0.0,
-            "memory_usage_cpu_usage": 0.0,
+            "memory_usage_cpu_usage": 2.766666666666667,
             "memory_usage_success_rate": 100.0,
-            "system_integration_performance_execution_time": 26.004552841186523,
+            "system_integration_performance_execution_time": 26.28151575724284,
             "system_integration_performance_memory_usage": 0.0,
-            "system_integration_performance_cpu_usage": 0.7000000000000001,
+            "system_integration_performance_cpu_usage": 10.416666666666666,
             "system_integration_performance_success_rate": 100.0
           },
           "thresholds": {
@@ -161,12 +161,12 @@
           {
             "test_name": "file_loading_performance",
             "test_type": "performance",
-            "execution_time": 19.625365734100342,
-            "memory_usage": 0.009765625,
-            "cpu_usage": 5.7625,
+            "execution_time": 17.21477508544922,
+            "memory_usage": 0.0107421875,
+            "cpu_usage": 9.9,
             "success_rate": 100.0,
             "error_count": 0,
-            "timestamp": "2025-12-02 10:38:54.752982",
+            "timestamp": "2025-12-16 14:03:08.155709",
             "metadata": {
               "test_files": [
                 "small_file.md",
@@ -180,12 +180,12 @@
           {
             "test_name": "markdown_rendering_performance",
             "test_type": "performance",
-            "execution_time": 15.042622884114584,
+            "execution_time": 11.98879877726237,
             "memory_usage": 0.0,
-            "cpu_usage": 0.0,
+            "cpu_usage": 1.3833333333333335,
             "success_rate": 100.0,
             "error_count": 0,
-            "timestamp": "2025-12-02 10:38:54.799590",
+            "timestamp": "2025-12-16 14:03:08.193125",
             "metadata": {
               "samples_count": 3,
               "iterations": 3
@@ -194,12 +194,12 @@
           {
             "test_name": "cache_performance",
             "test_type": "performance",
-            "execution_time": 12.14444637298584,
-            "memory_usage": 0.0,
-            "cpu_usage": 4.8,
+            "execution_time": 11.89124584197998,
+            "memory_usage": 0.0009765625,
+            "cpu_usage": 5.2125,
             "success_rate": 100.0,
             "error_count": 0,
-            "timestamp": "2025-12-02 10:38:54.849990",
+            "timestamp": "2025-12-16 14:03:08.243299",
             "metadata": {
               "operations": [
                 "get",
@@ -213,12 +213,12 @@
           {
             "test_name": "error_handling_performance",
             "test_type": "performance",
-            "execution_time": 12.135148048400879,
+            "execution_time": 14.704704284667969,
             "memory_usage": 0.0009765625,
-            "cpu_usage": 5.9875,
+            "cpu_usage": 29.65,
             "success_rate": 100.0,
             "error_count": 0,
-            "timestamp": "2025-12-02 10:38:54.900564",
+            "timestamp": "2025-12-16 14:03:08.304747",
             "metadata": {
               "error_types": [
                 "file_not_found",
@@ -232,12 +232,12 @@
           {
             "test_name": "memory_usage",
             "test_type": "performance",
-            "execution_time": 16.173124313354492,
+            "execution_time": 14.904340108235678,
             "memory_usage": 0.0,
-            "cpu_usage": 0.0,
+            "cpu_usage": 2.766666666666667,
             "success_rate": 100.0,
             "error_count": 0,
-            "timestamp": "2025-12-02 10:38:54.951680",
+            "timestamp": "2025-12-16 14:03:08.351304",
             "metadata": {
               "memory_tests": [
                 "normal_operation",
@@ -250,12 +250,12 @@
           {
             "test_name": "system_integration_performance",
             "test_type": "performance",
-            "execution_time": 26.004552841186523,
+            "execution_time": 26.28151575724284,
             "memory_usage": 0.0,
-            "cpu_usage": 0.7000000000000001,
+            "cpu_usage": 10.416666666666666,
             "success_rate": 100.0,
             "error_count": 0,
-            "timestamp": "2025-12-02 10:38:55.031700",
+            "timestamp": "2025-12-16 14:03:08.431692",
             "metadata": {
               "integration_tests": [
                 "module_communication",
@@ -270,50 +270,50 @@
           "total_tests": 6,
           "successful_tests": 6,
           "failed_tests": 0,
-          "average_execution_time": 16.85421003235711,
-          "average_memory_usage": 0.0017903645833333333,
-          "average_cpu_usage": 2.875,
+          "average_execution_time": 16.164229975806343,
+          "average_memory_usage": 0.0021158854166666665,
+          "average_cpu_usage": 9.888194444444444,
           "average_success_rate": 100.0,
           "performance_summary": {
             "file_loading_performance": {
-              "execution_time": 19.625365734100342,
-              "memory_usage": 0.009765625,
-              "cpu_usage": 5.7625,
+              "execution_time": 17.21477508544922,
+              "memory_usage": 0.0107421875,
+              "cpu_usage": 9.9,
               "success_rate": 100.0,
               "status": "passed"
             },
             "markdown_rendering_performance": {
-              "execution_time": 15.042622884114584,
+              "execution_time": 11.98879877726237,
               "memory_usage": 0.0,
-              "cpu_usage": 0.0,
+              "cpu_usage": 1.3833333333333335,
               "success_rate": 100.0,
               "status": "passed"
             },
             "cache_performance": {
-              "execution_time": 12.14444637298584,
-              "memory_usage": 0.0,
-              "cpu_usage": 4.8,
+              "execution_time": 11.89124584197998,
+              "memory_usage": 0.0009765625,
+              "cpu_usage": 5.2125,
               "success_rate": 100.0,
               "status": "passed"
             },
             "error_handling_performance": {
-              "execution_time": 12.135148048400879,
+              "execution_time": 14.704704284667969,
               "memory_usage": 0.0009765625,
-              "cpu_usage": 5.9875,
+              "cpu_usage": 29.65,
               "success_rate": 100.0,
               "status": "passed"
             },
             "memory_usage": {
-              "execution_time": 16.173124313354492,
+              "execution_time": 14.904340108235678,
               "memory_usage": 0.0,
-              "cpu_usage": 0.0,
+              "cpu_usage": 2.766666666666667,
               "success_rate": 100.0,
               "status": "passed"
             },
             "system_integration_performance": {
-              "execution_time": 26.004552841186523,
+              "execution_time": 26.28151575724284,
               "memory_usage": 0.0,
-              "cpu_usage": 0.7000000000000001,
+              "cpu_usage": 10.416666666666666,
               "success_rate": 100.0,
               "status": "passed"
             }
@@ -326,38 +326,38 @@
           "regression_analysis": {},
           "performance_changes": {
             "file_loading_performance": {
-              "baseline": 19.625365734100342,
-              "current": 19.625365734100342,
+              "baseline": 17.21477508544922,
+              "current": 17.21477508544922,
               "change_percentage": 0.0,
               "regression": false
             },
             "markdown_rendering_performance": {
-              "baseline": 15.042622884114584,
-              "current": 15.042622884114584,
+              "baseline": 11.98879877726237,
+              "current": 11.98879877726237,
               "change_percentage": 0.0,
               "regression": false
             },
             "cache_performance": {
-              "baseline": 12.14444637298584,
-              "current": 12.14444637298584,
+              "baseline": 11.89124584197998,
+              "current": 11.89124584197998,
               "change_percentage": 0.0,
               "regression": false
             },
             "error_handling_performance": {
-              "baseline": 12.135148048400879,
-              "current": 12.135148048400879,
+              "baseline": 14.704704284667969,
+              "current": 14.704704284667969,
               "change_percentage": 0.0,
               "regression": false
             },
             "memory_usage": {
-              "baseline": 16.173124313354492,
-              "current": 16.173124313354492,
+              "baseline": 14.904340108235678,
+              "current": 14.904340108235678,
               "change_percentage": 0.0,
               "regression": false
             },
             "system_integration_performance": {
-              "baseline": 26.004552841186523,
-              "current": 26.004552841186523,
+              "baseline": 26.28151575724284,
+              "current": 26.28151575724284,
               "change_percentage": 0.0,
               "regression": false
             }
@@ -378,14 +378,14 @@
           "regression_detection": true,
           "alerting": true
         },
-        "total_execution_time": 0.3607463836669922
+        "total_execution_time": 0.34969043731689453
       }
     },
     {
       "test_name": "LinkProcessor\u96c6\u6210\u51c6\u5907\u6d4b\u8bd5",
       "test_type": "preparation",
       "status": "passed",
-      "execution_time": 0.00024580955505371094,
+      "execution_time": 0.0003249645233154297,
       "error_message": null,
       "details": {
         "status": "completed",
@@ -416,18 +416,18 @@
           "stability_mechanisms_ready": 6,
           "overall_status": "ready"
         },
-        "preparation_time": 1764643135.0325606
+        "preparation_time": 1765864988.4326947
       }
     },
     {
       "test_name": "\u5b8c\u5584\u5efa\u8bae\u5bf9\u6bd4\u5206\u6790\u6d4b\u8bd5",
       "test_type": "analysis",
       "status": "passed",
-      "execution_time": 0.00017189979553222656,
+      "execution_time": 0.0002193450927734375,
       "error_message": null,
       "details": {
         "status": "completed",
-        "analysis_time": 1764643135.032693,
+        "analysis_time": 1765864988.4328852,
         "comparison_results": [
           {
             "comparison_type": "ComparisonType.LOGGING_SYSTEM",
@@ -546,16 +546,16 @@
             "priority": "high",
             "title": "\u9ad8\u4f18\u5148\u7ea7\u6539\u8fdb\u5efa\u8bae",
             "recommendations": [
-              "\u4f18\u5316\u5185\u5b58\u4f7f\u7528\u6a21\u5f0f",
               "\u5efa\u7acb\u81ea\u52a8\u6269\u7f29\u5bb9\u673a\u5236",
               "\u589e\u52a0\u7ed3\u6784\u5316\u65e5\u5fd7\u652f\u6301",
-              "\u4f18\u5316\u65e5\u5fd7\u6027\u80fd",
+              "\u4f18\u5316\u5185\u5b58\u4f7f\u7528\u6a21\u5f0f",
               "\u5b9e\u73b0\u7edf\u4e00\u7684\u65e5\u5fd7\u8bb0\u5f55\u6846\u67b6",
+              "\u6539\u8fdbCPU\u8c03\u5ea6\u7b56\u7565",
+              "\u589e\u5f3a\u544a\u8b66\u673a\u5236",
               "\u5efa\u7acb\u65e5\u5fd7\u5206\u6790\u7ba1\u9053",
               "\u5b9e\u73b0\u667a\u80fd\u8d44\u6e90\u76d1\u63a7",
               "\u589e\u5f3a\u7f13\u5b58\u7ba1\u7406",
-              "\u589e\u5f3a\u544a\u8b66\u673a\u5236",
-              "\u6539\u8fdbCPU\u8c03\u5ea6\u7b56\u7565"
+              "\u4f18\u5316\u65e5\u5fd7\u6027\u80fd"
             ],
             "estimated_effort": "high",
             "estimated_impact": "high",
@@ -565,16 +565,16 @@
             "priority": "medium",
             "title": "\u4e2d\u4f18\u5148\u7ea7\u6539\u8fdb\u5efa\u8bae",
             "recommendations": [
-              "\u5efa\u7acb\u67b6\u6784\u8bc4\u4f30\u673a\u5236",
-              "\u5efa\u7acb\u5168\u9762\u7684\u6027\u80fd\u6d4b\u8bd5\u5957\u4ef6",
-              "\u589e\u5f3a\u56de\u5f52\u68c0\u6d4b\u673a\u5236",
-              "\u589e\u5f3a\u914d\u7f6e\u7075\u6d3b\u6027",
-              "\u5b8c\u5584\u6027\u80fd\u76d1\u63a7\u4f53\u7cfb",
-              "\u5efa\u7acb\u67b6\u6784\u6f14\u8fdb\u8def\u7ebf\u56fe",
-              "\u5b9e\u73b0\u81ea\u52a8\u5316\u6027\u80fd\u6d4b\u8bd5",
-              "\u5efa\u7acb\u6027\u80fd\u57fa\u51c6\u6570\u636e\u5e93",
               "\u5b9e\u73b0\u63d2\u4ef6\u5316\u67b6\u6784",
-              "\u589e\u5f3a\u6a21\u5757\u95f4\u89e3\u8026"
+              "\u5b8c\u5584\u6027\u80fd\u76d1\u63a7\u4f53\u7cfb",
+              "\u589e\u5f3a\u6a21\u5757\u95f4\u89e3\u8026",
+              "\u5b9e\u73b0\u81ea\u52a8\u5316\u6027\u80fd\u6d4b\u8bd5",
+              "\u5efa\u7acb\u67b6\u6784\u6f14\u8fdb\u8def\u7ebf\u56fe",
+              "\u5efa\u7acb\u5168\u9762\u7684\u6027\u80fd\u6d4b\u8bd5\u5957\u4ef6",
+              "\u5efa\u7acb\u6027\u80fd\u57fa\u51c6\u6570\u636e\u5e93",
+              "\u589e\u5f3a\u914d\u7f6e\u7075\u6d3b\u6027",
+              "\u5efa\u7acb\u67b6\u6784\u8bc4\u4f30\u673a\u5236",
+              "\u589e\u5f3a\u56de\u5f52\u68c0\u6d4b\u673a\u5236"
             ],
             "estimated_effort": "medium",
             "estimated_impact": "medium",
@@ -584,10 +584,10 @@
             "priority": "low",
             "title": "\u4f4e\u4f18\u5148\u7ea7\u6539\u8fdb\u5efa\u8bae",
             "recommendations": [
-              "\u5b9e\u73b0\u914d\u7f6e\u5ba1\u8ba1\u529f\u80fd",
-              "\u589e\u5f3a\u914d\u7f6e\u5b89\u5168\u63aa\u65bd",
-              "\u5b8c\u5584\u7248\u672c\u63a7\u5236\u673a\u5236",
               "\u5efa\u7acb\u914d\u7f6e\u9a8c\u8bc1\u6846\u67b6",
+              "\u5b9e\u73b0\u914d\u7f6e\u5ba1\u8ba1\u529f\u80fd",
+              "\u5b8c\u5584\u7248\u672c\u63a7\u5236\u673a\u5236",
+              "\u589e\u5f3a\u914d\u7f6e\u5b89\u5168\u63aa\u65bd",
               "\u5b9e\u73b0\u914d\u7f6e\u52a8\u6001\u91cd\u8f7d\u673a\u5236"
             ],
             "estimated_effort": "low",
@@ -692,7 +692,7 @@
       "test_name": "\u7cfb\u7edf\u6574\u4f53\u96c6\u6210\u6d4b\u8bd5",
       "test_type": "system",
       "status": "passed",
-      "execution_time": 1.430511474609375e-06,
+      "execution_time": 1.9073486328125e-06,
       "error_message": null,
       "details": {
         "coordinator_ready": true,
@@ -703,5 +703,5 @@
       }
     }
   ],
-  "timestamp": "2025-12-02T10:38:55.033247"
+  "timestamp": "2025-12-16T14:03:08.433661"
 }
